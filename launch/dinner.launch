@@ -1,0 +1,8 @@
+<launch>
+ <!--   <node name="camera_fix" pkg="baxter_tools" type="camera_control.py" args="-o left_hand_camera -r 960x600 "/> -->
+    <node name="face" pkg="baxter_examples" type="xdisplay_image.py" args="--file=$(find example)/media/fancy_indeed.png"/>
+    <node name="dapper_baxter" pkg="example" type="dapper_baxter.py"/>
+    <node name="ik_node" pkg="example" type="ik_node.py"/>
+<!--    <node name="image_processing" pkg="example" type="opencv1.py"/> -->
+    <node name="image_processing_right" pkg="example" type="opencv_right.py"/>
+</launch>

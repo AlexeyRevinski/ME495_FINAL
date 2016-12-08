@@ -1,0 +1,4 @@
+<launch>
+    <node name="face" pkg="baxter_examples" type="xdisplay_image.py" args="--file=$(find example)/media/standard_screen.png"/>
+    <node name="me495_baxter_reset" pkg="example" type="me495_baxter_reset.py"/>
+</launch>
