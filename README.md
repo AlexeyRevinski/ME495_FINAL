@@ -26,9 +26,11 @@ __`ik_node.py`__
 
 
 __`me495_baxter_reset.py`__
+
 This node, after initializing a node and enabling Baxter, instantiates two Limb objects, for the left and right arms and a Head object. Using its move_to_neutral() class function we set the left and right limbs back to the neutral pose. Using the head.set_pan() class function, we reset the pan angle back to 0. 
 
 __`opencv_right.py`__
+
 This node handles the color and circle center detection (center is key to tracking the target utensil's position). The high level description of this node operation is as follows: ROS Image message types are converted through CvBridge to openCV images. By using preset HSV minimum/maximum boundaries, as well as preset exposure settings, Baxter's right hand camera can isolate the positions of the red regions and apply a binary mask with the cv2.threshold functionality. Using the region that are boolean "True" (e.g. red in HSV coordinates), a miniumum enclosing circle (x,y,radius) is drawn on the "True" regions using cv2.findContours and cv2.minEnclosingCircle. With respect to ROS communication, this node acts as a subscriber to the "/robot/limb/right/endpoint_state" and "/cameras/right_hand_camera/image" topics, while also initializing a service that takes in the detected color and returns the (x,y) coordinates of the region of interest. 
 
 ## FINAL FUNCTIONALITY (VIDEO)
