@@ -91,9 +91,27 @@ camera.exposure =9
 2. HSV range
 Baxter's image processing also depends on the HSV range you choose for each color and is also greatly affected by the external environment Baxter is in. To solve issues arising from incorrect HSV range, we tested color recognition for each color by manually changing the HSV range for each color. 
 
-3. Calibration value
+3. Calibration values
+To account for the various vertical distances involved in our project implementation, we defined a reference position for Baxter's right hand end-effector to be above the utensil placeholder stage. This, coupled with variance in distances of the plate to the placeholder stage and camera calibration issues, necessitated the need to re-calculate a `ZOFF` parameter in different environments, since the distance metrics were measured by hand and hardcoded. 
+
+Another calibration concern arose from Baxter's right hand camera. By the following formula for converting pixel coordinates to 3D coordinates with respect to the fixed world frame:
+
+```
+xb = (cy - 0.5*height)*calibration*z_disp + Bpx + cam_disp_x
+yb = (cx - 0.5*width)*calibration*z_disp + Bpy + cam_disp_y
+```
+
+where (cx,cy) represent the center coordinates in pixel coordinates (collected from color and contour detection), (height,width) represent the pixel resolution of the image at the time of measurement, Bpx and Bpy being , and the remaining z_disp, calibration, cam_disp_x, and cam_disp_y being calibration factors. There were trials we noticed that Baxter would attempt to grip in such an offset from the desired position such that the offset was "symmetric" relative to the center of the region Baxter's right hand camera was viewing. We noticed that by tuning the "calibration" parameter, we were able to mitigate this effect assuming other variables were held constant. This proved to be more difficult than anticipated due to influence from other image processing variables such as lighting/exposure and ZOFF.
 
 __Timing__
 
 1. Timing Issues
 Debugging with rospy.loginfo() had varying degrees of success possible timing instability, printing to the terminal adds small delay
+
+Potential timing issues from our various nodes (queue size, publishing rate, cv2.waitforkey()) could have limited Baxter's ability to obtain the correct target positions needed to perform correct object detection and retrieval. False positives would manifest, but we noticed by adding various `rospy.loginfo()` commands, the error rate decreased; this shows there may be correlation between the timing and successful detection/retrieval. 
+
+__Distance__
+
+1. Errors in IK Solutions
+When distances between the desired utensil positions and the utensil placeholder stage were larger than the optimal distance, there were a non-trivial number of instances IK would not solve. This initially manifested as the end-effector freezing in place after calling the IK service `move_arm(x,y,z,limb)`. We attempted to fix this by, within `ik_node.py`, creating a if_else condition to try calling the IK service. If there was no valid solution found, then the right limb would move back to the neutral position with the `move_to_neutral()` function, then send another request to the IK service to try finding a valid joint position again. This unfortunately was not a robust solution, as it is entirely possible a valid solution would not be found in the neutral configuration either.   
+
