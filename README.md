@@ -22,11 +22,28 @@ For this demo, you will need the following:
 
 ### LAUNCH FILES
 
-The 'dinner.launch' file launches the 3 nodes ...
+__`dinner.launch`__
+
+The `dinner.launch` file launches 4 nodes: `xdisplay_image.py`,`dapper_baxter.py`,`ik_node.py`, and `opencv_right.py`. `xdisplay_image.py` loads our "fancy" image to transfrom Baxter from an ordinary robot to one with the visage of an elegant English butler, complete with monocle and well-groomed mustache. This node is provided in the `baxter_examples` package, and takes in an argument to the specified file path to the desired image. This resets the Baxter head display image (Baxter's head display is 1024x600 pixel resolution). Please see below for the description of the latter three nodes.
+
+
+__`reset.launch`__
+
+The `reset.launch` file runs the `xdisplay_image.py` node again, with a modified `args` to specify the file path to the default SDK Baxter head display image. The `me495_baxter_reset.py` node is launched afterward to reset the head pan angle, left, and right arms back to the zero position and neutral positions, respectively.
 
 ### SERVICES
 
-The 
+__`ArmMovement.srv`__
+
+`float32 x`,`float32 y`,`float32 z`,`string limb` are the responses in the `ArmMovement.srv`, while `bool b` is the response.
+
+This is used in `ik_node.py` to verify if a valid set of joint angles were successfully found via Baxter's inverse kinematics service.
+
+__`image_proc.srv`__
+
+`string color` is the response in the `image_proc.srv`, while `bool b` is the response. 
+
+This is used in `opencv_right.py` to verify if a color was successfully found by our openCV color detection node.
 
 ### NODES
 __`dapper_baxter.py`__
@@ -47,7 +64,7 @@ At the end, baxter implements a celebratory stance that is self-explanatory from
 
 __`ik_node.py`__
 
-This node listens to the `/handle_ik` service and utilizes Baxter's IK service to, based on received goal coordinates, solves the inverse kinematics problem and moves the commanded limb into the goal configuration. If the IK solver does not find a solution, the limb is moved to a neutral position.
+This node listens to the `/handle_ik` service and utilizes Baxter's IK service to, based on received goal coordinates, solves the inverse kinematics problem and moves the commanded limb into the goal configuration. If the IK solver does not find a solution, the limb is moved to a neutral position. Please note that the orientation of the end-effector is specified by the `PoseStamped` message with the sub-field `Quarternion()`. For both the left and right arm, these are both hardcoded as ` x = 1.00, y = 0.00 z = 0.00 w = 0.00`.
 
 __`me495_baxter_reset.py`__
 
@@ -58,6 +75,8 @@ __`opencv_right.py`__
 This node handles the color and circle center detection (center is key to tracking the target utensil's position). ROS Image message types are converted through CvBridge to openCV images. By using preset HSV minimum/maximum boundaries, as well as preset exposure settings, Baxter's right hand camera can isolate the positions of the red regions and apply a binary mask with the `cv2.threshold` functionality. Using the region that are boolean "True" (e.g. red in HSV coordinates), a miniumum enclosing circle (x,y,radius) is drawn on the "True" regions using `cv2.findContours` and `cv2.minEnclosingCircle`. This node subscribes to the `/robot/limb/right/endpoint_state` and `/cameras/right_hand_camera/image` topics and initiates a service that takes in a color command and returns the (x,y) coordinates of the center of the region containing that color. 
 
 ## FINAL FUNCTIONALITY (VIDEO)
+
+
 
 ## ISSUES AND WORKAROUNDS
 __Image Processing__
@@ -72,7 +91,9 @@ camera.exposure =9
 2. HSV range
 Baxter's image processing also depends on the HSV range you choose for each color and is also greatly affected by the external environment Baxter is in. To solve issues arising from incorrect HSV range, we tested color recognition for each color by manually changing the HSV range for each color. 
 
-3. Callibration value
+3. Calibration value
 
-4. Timing Issues
+__Timing__
+
+1. Timing Issues
 Debugging with rospy.loginfo() had varying degrees of success possible timing instability, printing to the terminal adds small delay
