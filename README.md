@@ -10,28 +10,52 @@ The objective of this project is a simple setup for a fancy dinner using extensi
 ## PHYSICAL SETUP
 For this demo, you will need the following:
 
-1. *Black table cloth*: to prevent the reflection of the table from affecting Baxter's white balance and exposure, which consequently may affect its image processing capabilities of certain (or all) colors.
+1. *Black table cloth*: to prevent the light reflection from the table from affecting Baxter's white balance and exposure, which consequently may affect its image processing capabilities of certain (or all) colors.
 2. *Black plate*: black is preferred for this set-up due to the reasons described above.
-3. *Utensils*: fork, knife, spoon.
+3. *Utensils*: fork, knife, spoon, and any other dining utensils.
 4. *Color tape*: for this demo, we used __green, blue,__ and __red__ tape. It was determined that these three colors were easiest for Baxter to process and differentiate with its hand cameras. We taped each color to the largest area of each utensil and taped the center of the plate with red. For image processing, it is important for each color to cover enough area for Baxter to recognize with its cameras.
 5. *Foam padding*: to tape to Baxter's right hand flat grippers to ensure thin utensils are gripped securely.
-6. *Utensil stand*: we custom-made a utensil stand for Baxter to easily pick up thin utensils from the table.
+6. *Utensil stand*: we custom-built a utensil stand for Baxter to easily pick up thin utensils from the table. Since the utensils are so thin, Baxter needed some gripper clearance to get a more secure grip on the utensils. The stand was spray painted black following the reasons described above. 
 
 
-## HIGH LEVEL DESCRIPTION OF THE NODES/SERVICES
+## HIGH LEVEL DESCRIPTION OF THE INCLUDED FILES
+
+### LAUNCH FILES
+
+The 'dinner.launch' file launches the 3 nodes ...
+
+### SERVICES
+
+The 
+
+### NODES
 __`dapper_baxter.py`__
 
+This node uses the `/handle_ik` service (of type `ArmMovement.srv`) to send commands to the `ik_node.py` in order to move the robot into certain configurations. It also uses the `/handle_image_proc_right` service (of type `image_proc.srv`) to get 3D coordinates of various objects from the `opencv_right.py` node.
+
+After initializing baxter (calibrating and opening its gripper, making camera and limb objects, etc.), the code calls on the `/ik_handle` service to move the robot into a pre-defined "home" position. Then, the robot waits for a calibration factor parameter. This parameter is the vertical (z) distance in meters from the top of the utensil stand to the vertical midpoint of the foam grippers.
+
+When that parameter is passed by the user, the robot starts its main sequence.
+
+That sequence starts with the robot moving to a pre-set "plate home" position, where the center of the plate is most likely to be. Information from `opencv_right.py` node is used to detect the center of the plate. Then, the robot moves to the "home configuration" and starts looking for utensils.
+
+The code has three colors lined up for picking: blue, then green, and red. For each one, it first communicates with `opencv_right.py` to get the 3D location of an object of the particular color, then moves Baxter's right gripper to the location of that object offset a bit towards Baxter to grip the utensil somewhere closer to its center of mass. The gripper is then closed, and the limb is moved into its home configuration. Then, the code moves the limb to the center-of-the-plate configuration with a hard-coded offset to the left or right of the plate to drop off the utensil. The gripper is opened, the utensil happily drops to the table, and Baxter returns to "home". Then, the process repeats for the other colors. 
+
+In various sections of the code, we implemented rospy.sleep() commands to counter various physical and software timing issues.
+
+At the end, baxter implements a celebratory stance that is self-explanatory from its name. For funs.
 
 __`ik_node.py`__
 
+This node listens to the `/handle_ik` service and utilizes Baxter's IK service to, based on received goal coordinates, solves the inverse kinematics problem and moves the commanded limb into the goal configuration. If the IK solver does not find a solution, the limb is moved to a neutral position.
 
 __`me495_baxter_reset.py`__
 
-This node, after initializing a node and enabling Baxter, instantiates two Limb objects, for the left and right arms and a Head object. Using its move_to_neutral() class function we set the left and right limbs back to the neutral pose. Using the head.set_pan() class function, we reset the pan angle back to 0. 
+This node enables Baxter, instantiates the left and right `baxter_interface.Limb()` objects and a `baxter_interface.Head()` object. Using its `.move_to_neutral()` class function we set the left and right limbs back to the neutral pose. Using the `head.set_pan()` class function, we reset the pan angle back to 0. 
 
 __`opencv_right.py`__
 
-This node handles the color and circle center detection (center is key to tracking the target utensil's position). The high level description of this node operation is as follows: ROS Image message types are converted through CvBridge to openCV images. By using preset HSV minimum/maximum boundaries, as well as preset exposure settings, Baxter's right hand camera can isolate the positions of the red regions and apply a binary mask with the cv2.threshold functionality. Using the region that are boolean "True" (e.g. red in HSV coordinates), a miniumum enclosing circle (x,y,radius) is drawn on the "True" regions using cv2.findContours and cv2.minEnclosingCircle. With respect to ROS communication, this node acts as a subscriber to the "/robot/limb/right/endpoint_state" and "/cameras/right_hand_camera/image" topics, while also initializing a service that takes in the detected color and returns the (x,y) coordinates of the region of interest. 
+This node handles the color and circle center detection (center is key to tracking the target utensil's position). ROS Image message types are converted through CvBridge to openCV images. By using preset HSV minimum/maximum boundaries, as well as preset exposure settings, Baxter's right hand camera can isolate the positions of the red regions and apply a binary mask with the `cv2.threshold` functionality. Using the region that are boolean "True" (e.g. red in HSV coordinates), a miniumum enclosing circle (x,y,radius) is drawn on the "True" regions using `cv2.findContours` and `cv2.minEnclosingCircle`. This node subscribes to the `/robot/limb/right/endpoint_state` and `/cameras/right_hand_camera/image` topics and initiates a service that takes in a color command and returns the (x,y) coordinates of the center of the region containing that color. 
 
 ## FINAL FUNCTIONALITY (VIDEO)
 
@@ -50,3 +74,5 @@ Baxter's image processing also depends on the HSV range you choose for each colo
 
 3. Callibration value
 
+4. Timing Issues
+Debugging with rospy.loginfo() had varying degrees of success possible timing instability, printing to the terminal adds small delay
