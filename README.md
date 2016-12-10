@@ -56,7 +56,7 @@ When that parameter is passed by the user, the robot starts its main sequence.
 
 That sequence starts with the robot moving to a pre-set "plate home" position, where the center of the plate is most likely to be. Information from `opencv_right.py` node is used to detect the center of the plate. Then, the robot moves to the "home configuration" and starts looking for utensils.
 
-The code has three colors lined up for picking: blue, then green, and red. For each one, it first communicates with `opencv_right.py` to get the 3D location of an object of the particular color, then moves Baxter's right gripper to the location of that object offset a bit towards Baxter to grip the utensil somewhere closer to its center of mass (there is colored tape placed at the centers of mass of the utensils, with more tape at the ends for more robust color detection-please see the embedded GIF in the Final Functionality section for better visualization). The gripper is then closed, and the limb is moved into its home configuration. Then, the code moves the limb to the center-of-the-plate configuration with a hard-coded offset to the left or right of the plate to drop off the utensil. The gripper is opened, the utensil happily drops to the table, and Baxter returns to "home". Then, the process repeats for the other colors. 
+The code has three colors lined up for picking: blue, then green, and red. For each one, it first communicates with `opencv_right.py` to get the 3D location of an object of the particular color, then moves Baxter's right gripper to the location of that object offset a bit towards Baxter to grip the utensil somewhere closer to its center of mass (there is colored tape placed at the centers of mass of the utensils, with more tape at the ends for more robust color detection-please click the link in the Final Functionality section to our video for better visualization). The gripper is then closed, and the limb is moved into its home configuration. Then, the code moves the limb to the center-of-the-plate configuration with a hard-coded offset to the left or right of the plate to drop off the utensil. The gripper is opened, the utensil happily drops to the table, and Baxter returns to "home". Then, the process repeats for the other colors. 
 
 In various sections of the code, we implemented rospy.sleep() commands to counter various physical and software timing issues.
 
@@ -76,12 +76,7 @@ This node handles the color and circle center detection (center is key to tracki
 
 ## FINAL FUNCTIONALITY (VIDEO)
 
-<p>
-<br>
-<img src="/home/lshi1617/FallQuarterClasses/ME495/FinalProject/ME495_final_video_test_closeup_CLIPCHAMP_720p.gif" alt="Close Up Visualization of Trial" width="720"
-      style="margin-left:auto; margin-right:auto; display:block;"/>
-<br>
-</p>
+This [link](https://vimeo.com/195054458) goes to our video uploaded on Vimeo, depicting a successful trial run with a close up view
 
 ## ISSUES AND WORKAROUNDS
 __Image Processing__
