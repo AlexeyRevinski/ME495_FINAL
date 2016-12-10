@@ -35,13 +35,13 @@ The `reset.launch` file runs the `xdisplay_image.py` node again, with a modified
 
 __`ArmMovement.srv`__
 
-`float32 x`,`float32 y`,`float32 z`,`string limb` are the responses in the `ArmMovement.srv`, while `bool b` is the response.
+`float32 x`,`float32 y`,`float32 z`,`string limb` are the requests in the `ArmMovement.srv`.
 
 This is used in `ik_node.py` to verify if a valid set of joint angles were successfully found via Baxter's inverse kinematics service.
 
 __`image_proc.srv`__
 
-`string color` is the response in the `image_proc.srv`, while `bool b` is the response. 
+`string color` is the request in the `image_proc.srv`. 
 
 This is used in `opencv_right.py` to verify if a color was successfully found by our openCV color detection node.
 
