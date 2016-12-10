@@ -87,6 +87,7 @@ This node handles the color and circle center detection (center is key to tracki
 __Image Processing__
 
 1. Exposure
+
 Baxter's image processing depends highly on its ability to recognize different colors. Due to the effects the external environment (*i.e.,* lighting) may have on the way its cameras perseive color, it is important to callibrate them before running this demo. After running this demonstration under two different lighting conditions (on two separate Baxters), it was determined that controlling the exposure of Baxter's hand cameras may have a great impact on whether it is able to process certain colors or not. It was also determined that the same color (in our case, it was red) will be perceived differently by its cameras depending on the height of the camera placed above each color. In this case, it is possible that Baxter will pick up red at one height, but will not see it at another height. To solve this, we changed the exposure of the hand camera for each condition using the following line in `dapper_baxter.py`:
 ```
 camera = baxter_interface.camera.CameraController('right_hand_camera')
@@ -94,9 +95,11 @@ camera.exposure =9
 ```
 
 2. HSV range
+
 Baxter's image processing also depends on the HSV range you choose for each color and is also greatly affected by the external environment Baxter is in. To solve issues arising from incorrect HSV range, we tested color recognition for each color by manually changing the HSV range for each color. 
 
 3. Calibration values
+
 To account for the various vertical distances involved in our project implementation, we defined a reference position for Baxter's right hand end-effector to be above the utensil placeholder stage. This, coupled with variance in distances of the plate to the placeholder stage and camera calibration issues, necessitated the need to re-calculate a `ZOFF` parameter in different environments, since the distance metrics were measured by hand and hardcoded. 
 
 Another calibration concern arose from Baxter's right hand camera. By the following formula for converting pixel coordinates to 3D coordinates with respect to the fixed world frame:
@@ -111,6 +114,7 @@ where (cx,cy) represent the center coordinates in pixel coordinates (collected f
 __Timing__
 
 1. Timing Issues
+
 Debugging with rospy.loginfo() had varying degrees of success possible timing instability, printing to the terminal adds small delay
 
 Potential timing issues from our various nodes (queue size, publishing rate, cv2.waitforkey()) could have limited Baxter's ability to obtain the correct target positions needed to perform correct object detection and retrieval. False positives would manifest, but we noticed by adding various `rospy.loginfo()` commands, the error rate decreased; this shows there may be correlation between the timing and successful detection/retrieval. 
@@ -118,5 +122,6 @@ Potential timing issues from our various nodes (queue size, publishing rate, cv2
 __Distance__
 
 1. Errors in IK Solutions
+
 When distances between the desired utensil positions and the utensil placeholder stage were larger than the optimal distance, there were a non-trivial number of instances IK would not solve. This initially manifested as the end-effector freezing in place after calling the IK service `move_arm(x,y,z,limb)`. We attempted to fix this by, within `ik_node.py`, creating a if_else condition to try calling the IK service. If there was no valid solution found, then the right limb would move back to the neutral position with the `move_to_neutral()` function, then send another request to the IK service to try finding a valid joint position again. This unfortunately was not a robust solution, as it is entirely possible a valid solution would not be found in the neutral configuration either.   
 
