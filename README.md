@@ -1,7 +1,7 @@
 # ME495_FINAL
 Fancy Dinner
 
-[![Screenshot](https://github.com/AlexeyRevinski/ME495_FINAL/blob/master/media/group4demo.png)]
+![Screenshot](https://github.com/AlexeyRevinski/ME495_FINAL/blob/master/media/group4demo.png)
 
 ## PROBLEM STATEMENT
 The objective of this project is a simple setup for a fancy dinner using extensive capabilities of Baxter, our loyal servant (in both meanings of the word). Given a set of three utensils (a fork, a spoon, and a knife), Baxter will be required to place them in a specified position relative to a plate (fixed in the center), akin to proper table setting in a fancy restaurant. Each utensil is marked with a different color (red, green, or blue), which allows Baxter to differentiate between the utensils and pick and place them in their proper positions. In this demonstration, Baxter also determines the position of the plate and stores it for future reference. 
